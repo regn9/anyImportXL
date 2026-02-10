@@ -1,4 +1,5 @@
 VERSION 5.00
+Object = "{0D452EE1-E08F-101A-852E-02608C4D0BB4}#2.0#0"; "FM20.DLL"
 Begin VB.UserForm frmMain 
    Caption         =   "anyImportXL"
    ClientHeight    =   9000

@@ -58,4 +58,6 @@ When you export `frmMain` from VBE, Excel may generate both:
 - `frmMain.frx` (binary control/resource data, referenced by `OleObjectBlob`).
 
 If `OleObjectBlob` is present in `.frm`, keep and distribute the matching `.frx` file beside it during import. Missing `.frx` can cause import failure or incomplete controls.
-
+- If VBE reports `Class VB.CommandButton ... was not a loaded control class`, verify the `.frm` includes:
+  `Object = "{0D452EE1-E08F-101A-852E-02608C4D0BB4}#2.0#0"; "FM20.DLL"`
+  near the top so Microsoft Forms 2.0 controls can load.
