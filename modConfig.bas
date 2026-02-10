@@ -33,22 +33,22 @@ Public Sub SaveProfile(ByVal profileKey As String, ByVal vars As Collection, ByV
     r = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
 
     For i = 1 To vars.Count
-        Dim vb As CVarBinding
-        Set vb = vars(i)
+        Dim vb As TVarBinding
+        vb = vars(i)
         WriteCfgRow ws, r, profileKey, "VAR", vb.VarName, vb.AccountCode, vb.Label, vb.Metric
         r = r + 1
     Next i
 
     For i = 1 To outputs.Count
-        Dim od As COutputDef
-        Set od = outputs(i)
+        Dim od As TOutputDef
+        od = outputs(i)
         WriteCfgRow ws, r, profileKey, "OUT", od.OutputName, od.FormulaText, "", ""
         r = r + 1
     Next i
 
     For i = 1 To targets.Count
-        Dim tm As CTargetMap
-        Set tm = targets(i)
+        Dim tm As TTargetMap
+        tm = targets(i)
         WriteCfgRow ws, r, profileKey, "MAP", tm.OutputName, tm.TargetSheet, tm.TargetAddress, ""
         r = r + 1
     Next i
@@ -73,22 +73,19 @@ Public Sub LoadProfile(ByVal profileKey As String, ByRef vars As Collection, ByR
             kind = CStr(ws.Cells(i, 2).Value2)
             Select Case kind
                 Case "VAR"
-                    Dim vb As CVarBinding
-                    Set vb = NewVarBinding()
+                    Dim vb As TVarBinding
                     vb.VarName = CStr(ws.Cells(i, 3).Value2)
                     vb.AccountCode = CStr(ws.Cells(i, 4).Value2)
                     vb.Label = CStr(ws.Cells(i, 5).Value2)
                     vb.Metric = CStr(ws.Cells(i, 6).Value2)
                     vars.Add vb
                 Case "OUT"
-                    Dim od As COutputDef
-                    Set od = NewOutputDef()
+                    Dim od As TOutputDef
                     od.OutputName = CStr(ws.Cells(i, 3).Value2)
                     od.FormulaText = CStr(ws.Cells(i, 4).Value2)
                     outputs.Add od
                 Case "MAP"
-                    Dim tm As CTargetMap
-                    Set tm = NewTargetMap()
+                    Dim tm As TTargetMap
                     tm.OutputName = CStr(ws.Cells(i, 3).Value2)
                     tm.TargetSheet = CStr(ws.Cells(i, 4).Value2)
                     tm.TargetAddress = CStr(ws.Cells(i, 5).Value2)

@@ -6,12 +6,11 @@ This repository contains VBA source modules for an Excel add-in (`.xlam`) that i
 
 - `modEntry.bas` - Entry macro to open main UI.
 - `modParserHtml.bas` - HTML table parser (`contentTable` fallback first table).
-- `modModel.bas` - Model factory helpers for class-based records.
+- `modModel.bas` - Record and mapping model types.
 - `modFormula.bas` - Safe formula tokenizer + evaluator (+ - * / parentheses, A..Z).
 - `modConfig.bas` - Persistent profile storage in add-in `zConfig` sheet (`VeryHidden`).
 - `modWriter.bas` - Apply output values + `_ImportLog` logging.
-- `CReportRow.cls`, `CVarBinding.cls`, `COutputDef.cls`, `CTargetMap.cls` - Class-based models used in collections.
-- `frmMain.frm` - Main UserForm UI logic (VBE-importable form definition).
+- `frmMain.frm` - Main UserForm UI logic.
 
 ## Build `.xlam`
 
@@ -19,7 +18,6 @@ This repository contains VBA source modules for an Excel add-in (`.xlam`) that i
 2. Open VBA editor (`ALT+F11`).
 3. Import modules (`File -> Import File...`):
    - `modEntry.bas`, `modParserHtml.bas`, `modModel.bas`, `modFormula.bas`, `modConfig.bas`, `modWriter.bas`.
-   - `CReportRow.cls`, `CVarBinding.cls`, `COutputDef.cls`, `CTargetMap.cls`.
 4. Import `frmMain.frm`.
 5. Save workbook as **Excel Add-In (`.xlam`)**.
 6. Install add-in:

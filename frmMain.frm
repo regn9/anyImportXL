@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmMain 
+Begin VB.UserForm frmMain 
    Caption         =   "anyImportXL"
    ClientHeight    =   9000
    ClientLeft      =   120
@@ -167,33 +167,32 @@ Private Sub UserForm_Initialize()
     lstOutputs.ColumnCount = 5
     lstOutputs.ColumnWidths = "35 pt;140 pt;90 pt;120 pt;80 pt"
 
-    EnsureDefaultOutputs
-    RefreshSheets
-
-    On Error Resume Next
-    LoadProfile CurrentProfileKey, mVars, mOutputs, mTargets
-    On Error GoTo 0
-
-    If mOutputs.Count = 0 Then EnsureDefaultOutputs
-    RefreshVarList
-    RefreshOutputList
-End Sub
-
-Private Sub EnsureDefaultOutputs()
-    If mOutputs.Count > 0 Then Exit Sub
-    Dim i As Long
     For i = 1 To 10
-        Dim od As COutputDef
-        Set od = NewOutputDef()
+        Dim od As TOutputDef
         od.OutputName = "O" & CStr(i)
         od.FormulaText = ""
         mOutputs.Add od
 
-        Dim tm As CTargetMap
-        Set tm = NewTargetMap()
+        Dim tm As TTargetMap
         tm.OutputName = od.OutputName
         mTargets.Add tm
     Next i
+
+    RefreshSheets
+    RefreshOutputList
+
+    On Error Resume Next
+    LoadProfile CurrentProfileKey, mVars, mOutputs, mTargets
+    If mOutputs.Count = 0 Then
+        For i = 1 To 10
+            od.OutputName = "O" & CStr(i)
+            mOutputs.Add od
+        Next i
+    End If
+    On Error GoTo 0
+
+    RefreshVarList
+    RefreshOutputList
 End Sub
 
 Private Sub btnImport_Click()
@@ -222,8 +221,8 @@ Private Sub RefreshRowList(ByVal filterText As String)
     lstRows.Clear
     Dim i As Long
     For i = 1 To mRows.Count
-        Dim rr As CReportRow
-        Set rr = mRows(i)
+        Dim rr As TReportRow
+        rr = mRows(i)
         If MatchFilter(rr, filterText) Then
             lstRows.AddItem rr.AccountCode
             lstRows.List(lstRows.ListCount - 1, 1) = rr.Label
@@ -235,7 +234,7 @@ Private Sub RefreshRowList(ByVal filterText As String)
     Next i
 End Sub
 
-Private Function MatchFilter(ByVal rr As CReportRow, ByVal filterText As String) As Boolean
+Private Function MatchFilter(ByVal rr As TReportRow, ByVal filterText As String) As Boolean
     If Len(Trim$(filterText)) = 0 Then
         MatchFilter = True
     Else
@@ -252,11 +251,10 @@ Private Sub btnBindVar_Click()
     Dim sourceIndex As Long
     sourceIndex = CLng(lstRows.List(lstRows.ListIndex, 5))
 
-    Dim rr As CReportRow
-    Set rr = mRows(sourceIndex)
+    Dim rr As TReportRow
+    rr = mRows(sourceIndex)
 
-    Dim vb As CVarBinding
-    Set vb = NewVarBinding()
+    Dim vb As TVarBinding
     vb.VarName = UCase$(cmbVar.Value)
     vb.AccountCode = rr.AccountCode
     vb.Label = rr.Label
@@ -270,7 +268,7 @@ Fail:
     MsgBox Err.Description, vbExclamation
 End Sub
 
-Private Function MetricValue(ByVal rr As CReportRow, ByVal metric As String) As Double
+Private Function MetricValue(ByVal rr As TReportRow, ByVal metric As String) As Double
     Select Case UCase$(metric)
         Case "CURRENT": MetricValue = rr.ValCurrent
         Case "PREV": MetricValue = rr.ValPrev
@@ -279,11 +277,11 @@ Private Function MetricValue(ByVal rr As CReportRow, ByVal metric As String) As 
     End Select
 End Function
 
-Private Sub UpsertVarBinding(ByVal entry As CVarBinding)
+Private Sub UpsertVarBinding(ByVal entry As TVarBinding)
     Dim i As Long
     For i = 1 To mVars.Count
-        Dim v As CVarBinding
-        Set v = mVars(i)
+        Dim v As TVarBinding
+        v = mVars(i)
         If UCase$(v.VarName) = UCase$(entry.VarName) Then
             mVars.Remove i
             Exit For
@@ -296,8 +294,8 @@ Private Sub RefreshVarList()
     lstVars.Clear
     Dim i As Long
     For i = 1 To mVars.Count
-        Dim v As CVarBinding
-        Set v = mVars(i)
+        Dim v As TVarBinding
+        v = mVars(i)
         lstVars.AddItem v.VarName
         lstVars.List(lstVars.ListCount - 1, 1) = v.AccountCode
         lstVars.List(lstVars.ListCount - 1, 2) = v.Metric
@@ -317,10 +315,10 @@ Private Sub RefreshOutputList()
     lstOutputs.Clear
     Dim i As Long
     For i = 1 To mOutputs.Count
-        Dim od As COutputDef
-        Set od = mOutputs(i)
-        Dim tm As CTargetMap
-        Set tm = FindTargetByOutput(od.OutputName)
+        Dim od As TOutputDef
+        od = mOutputs(i)
+        Dim tm As TTargetMap
+        tm = FindTargetByOutput(od.OutputName)
 
         lstOutputs.AddItem od.OutputName
         lstOutputs.List(lstOutputs.ListCount - 1, 1) = od.FormulaText
@@ -351,12 +349,19 @@ Private Sub btnSaveOutput_Click()
         End If
     End If
 
-    Dim od As COutputDef
-    Set od = FindOutputByName(outName)
-    od.FormulaText = Trim$(txtFormula.Value)
+    Dim i As Long
+    For i = 1 To mOutputs.Count
+        Dim od As TOutputDef
+        od = mOutputs(i)
+        If od.OutputName = outName Then
+            od.FormulaText = Trim$(txtFormula.Value)
+            mOutputs.Remove i
+            mOutputs.Add od, , i
+            Exit For
+        End If
+    Next i
 
-    Dim tm As CTargetMap
-    Set tm = NewTargetMap()
+    Dim tm As TTargetMap
     tm.OutputName = outName
     tm.TargetSheet = Trim$(cmbTargetSheet.Value)
     tm.TargetAddress = Trim$(txtTargetCell.Value)
@@ -368,47 +373,32 @@ Fail:
     MsgBox Err.Description, vbExclamation
 End Sub
 
-Private Function FindOutputByName(ByVal outName As String) As COutputDef
-    Dim i As Long
-    For i = 1 To mOutputs.Count
-        Dim od As COutputDef
-        Set od = mOutputs(i)
-        If UCase$(od.OutputName) = UCase$(outName) Then
-            Set FindOutputByName = od
-            Exit Function
-        End If
-    Next i
-    Set FindOutputByName = NewOutputDef()
-End Function
-
-Private Sub UpsertTarget(ByVal tm As CTargetMap)
+Private Sub UpsertTarget(ByVal tm As TTargetMap)
     Dim i As Long
     For i = 1 To mTargets.Count
-        Dim x As CTargetMap
-        Set x = mTargets(i)
+        Dim x As TTargetMap
+        x = mTargets(i)
         If UCase$(x.OutputName) = UCase$(tm.OutputName) Then
             mTargets.Remove i
-            mTargets.Add tm, , i
-            Exit Sub
+            Exit For
         End If
     Next i
     mTargets.Add tm
 End Sub
 
-Private Function FindTargetByOutput(ByVal outName As String) As CTargetMap
+Private Function FindTargetByOutput(ByVal outName As String) As TTargetMap
     Dim i As Long
     For i = 1 To mTargets.Count
-        Dim tm As CTargetMap
-        Set tm = mTargets(i)
+        Dim tm As TTargetMap
+        tm = mTargets(i)
         If UCase$(tm.OutputName) = UCase$(outName) Then
-            Set FindTargetByOutput = tm
+            FindTargetByOutput = tm
             Exit Function
         End If
     Next i
-    Dim fallback As CTargetMap
-    Set fallback = NewTargetMap()
+    Dim fallback As TTargetMap
     fallback.OutputName = outName
-    Set FindTargetByOutput = fallback
+    FindTargetByOutput = fallback
 End Function
 
 Private Function BuildVarMap() As Object
@@ -417,19 +407,19 @@ Private Function BuildVarMap() As Object
 
     Dim i As Long
     For i = 1 To mVars.Count
-        Dim vb As CVarBinding
-        Set vb = mVars(i)
+        Dim vb As TVarBinding
+        vb = mVars(i)
         vb.Value = ResolveBindingValue(vb)
         d(UCase$(vb.VarName)) = vb.Value
     Next i
     Set BuildVarMap = d
 End Function
 
-Private Function ResolveBindingValue(ByVal vb As CVarBinding) As Double
+Private Function ResolveBindingValue(ByVal vb As TVarBinding) As Double
     Dim i As Long
     For i = 1 To mRows.Count
-        Dim rr As CReportRow
-        Set rr = mRows(i)
+        Dim rr As TReportRow
+        rr = mRows(i)
         If rr.AccountCode = vb.AccountCode And rr.Label = vb.Label Then
             ResolveBindingValue = MetricValue(rr, vb.Metric)
             Exit Function
@@ -445,16 +435,18 @@ Private Sub btnPreview_Click()
 
     Dim i As Long
     For i = 1 To mOutputs.Count
-        Dim od As COutputDef
-        Set od = mOutputs(i)
+        Dim od As TOutputDef
+        od = mOutputs(i)
         If Len(Trim$(od.FormulaText)) > 0 Then
             od.LastValue = EvaluateFormula(od.FormulaText, varMap)
         Else
             od.LastValue = 0
         End If
+        mOutputs.Remove i
+        mOutputs.Add od, , i
 
-        Dim tm As CTargetMap
-        Set tm = FindTargetByOutput(od.OutputName)
+        Dim tm As TTargetMap
+        tm = FindTargetByOutput(od.OutputName)
         If Len(tm.TargetSheet) = 0 Or Len(tm.TargetAddress) = 0 Then
             LogMessage "WARN", "Missing target", od.OutputName
         ElseIf Not IsValidTarget(tm.TargetSheet, tm.TargetAddress) Then
@@ -526,7 +518,14 @@ End Sub
 Private Sub btnLoadProfile_Click()
     On Error GoTo Fail
     LoadProfile CurrentProfileKey, mVars, mOutputs, mTargets
-    If mOutputs.Count = 0 Then EnsureDefaultOutputs
+    If mOutputs.Count = 0 Then
+        Dim i As Long
+        For i = 1 To 10
+            Dim od As TOutputDef
+            od.OutputName = "O" & CStr(i)
+            mOutputs.Add od
+        Next i
+    End If
     RefreshVarList
     RefreshOutputList
     LogMessage "INFO", "Profile loaded", CurrentProfileKey
