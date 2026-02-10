@@ -16,11 +16,11 @@ Public Sub ApplyOutputValues(ByVal outputs As Collection, ByVal targets As Colle
 
     Dim i As Long
     For i = 1 To outputs.Count
-        Dim od As TOutputDef
-        od = outputs(i)
+        Dim od As COutputDef
+        Set od = outputs(i)
 
-        Dim tm As TTargetMap
-        tm = FindTargetMap(targets, od.OutputName)
+        Dim tm As CTargetMap
+        Set tm = FindTargetMap(targets, od.OutputName)
         If Len(tm.TargetSheet) > 0 And Len(tm.TargetAddress) > 0 Then
             Dim ws As Worksheet
             Set ws = ActiveWorkbook.Worksheets(tm.TargetSheet)
@@ -39,16 +39,17 @@ CleanFail:
     Resume CleanExit
 End Sub
 
-Public Function FindTargetMap(ByVal targets As Collection, ByVal outputName As String) As TTargetMap
+Public Function FindTargetMap(ByVal targets As Collection, ByVal outputName As String) As CTargetMap
     Dim i As Long
     For i = 1 To targets.Count
-        Dim tm As TTargetMap
-        tm = targets(i)
+        Dim tm As CTargetMap
+        Set tm = targets(i)
         If UCase$(tm.OutputName) = UCase$(outputName) Then
-            FindTargetMap = tm
+            Set FindTargetMap = tm
             Exit Function
         End If
     Next i
+    Set FindTargetMap = NewTargetMap()
 End Function
 
 Public Sub LogMessage(ByVal level As String, ByVal msg As String, Optional ByVal details As String = "")
@@ -69,3 +70,4 @@ Public Sub LogMessage(ByVal level As String, ByVal msg As String, Optional ByVal
     ws.Cells(r, 3).Value2 = msg
     ws.Cells(r, 4).Value2 = details
 End Sub
+

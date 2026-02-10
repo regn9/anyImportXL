@@ -1,48 +1,20 @@
 Attribute VB_Name = "modModel"
 Option Explicit
 
-Public Type TReportRow
-    AccountCode As String
-    Label As String
-    ValCurrent As Double
-    ValPrev As Double
-    ValChange As Double
-End Type
-
-Public Type TVarBinding
-    VarName As String
-    AccountCode As String
-    Label As String
-    Metric As String
-    Value As Double
-End Type
-
-Public Type TOutputDef
-    OutputName As String
-    FormulaText As String
-    LastValue As Double
-End Type
-
-Public Type TTargetMap
-    OutputName As String
-    TargetSheet As String
-    TargetAddress As String
-End Type
-
-Public Function NewReportRows() As Collection
-    Set NewReportRows = New Collection
+Public Function NewReportRow() As CReportRow
+    Set NewReportRow = New CReportRow
 End Function
 
-Public Function NewVarBindings() As Collection
-    Set NewVarBindings = New Collection
+Public Function NewVarBinding() As CVarBinding
+    Set NewVarBinding = New CVarBinding
 End Function
 
-Public Function NewOutputDefs() As Collection
-    Set NewOutputDefs = New Collection
+Public Function NewOutputDef() As COutputDef
+    Set NewOutputDef = New COutputDef
 End Function
 
-Public Function NewTargetMaps() As Collection
-    Set NewTargetMaps = New Collection
+Public Function NewTargetMap() As CTargetMap
+    Set NewTargetMap = New CTargetMap
 End Function
 
 Public Function NormalizeMetric(ByVal metric As String) As String

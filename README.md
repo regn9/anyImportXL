@@ -6,11 +6,12 @@ This repository contains VBA source modules for an Excel add-in (`.xlam`) that i
 
 - `modEntry.bas` - Entry macro to open main UI.
 - `modParserHtml.bas` - HTML table parser (`contentTable` fallback first table).
-- `modModel.bas` - Record and mapping model types.
+- `modModel.bas` - Model factory helpers for class-based records.
 - `modFormula.bas` - Safe formula tokenizer + evaluator (+ - * / parentheses, A..Z).
 - `modConfig.bas` - Persistent profile storage in add-in `zConfig` sheet (`VeryHidden`).
 - `modWriter.bas` - Apply output values + `_ImportLog` logging.
-- `frmMain.frm` - Main UserForm UI logic.
+- `CReportRow.cls`, `CVarBinding.cls`, `COutputDef.cls`, `CTargetMap.cls` - Class-based models used in collections.
+- `frmMain.frm` - Main UserForm UI logic (VBE-importable form definition).
 
 ## Build `.xlam`
 
@@ -18,6 +19,7 @@ This repository contains VBA source modules for an Excel add-in (`.xlam`) that i
 2. Open VBA editor (`ALT+F11`).
 3. Import modules (`File -> Import File...`):
    - `modEntry.bas`, `modParserHtml.bas`, `modModel.bas`, `modFormula.bas`, `modConfig.bas`, `modWriter.bas`.
+   - `CReportRow.cls`, `CVarBinding.cls`, `COutputDef.cls`, `CTargetMap.cls`.
 4. Import `frmMain.frm`.
 5. Save workbook as **Excel Add-In (`.xlam`)**.
 6. Install add-in:
@@ -48,3 +50,12 @@ This repository contains VBA source modules for an Excel add-in (`.xlam`) that i
 - Per-workbook profile key is `ActiveWorkbook.FullName`.
 - `zConfig` is created in the add-in workbook (`ThisWorkbook`) and set `xlSheetVeryHidden`.
 - Section/header rows with blank numeric columns are ignored during import.
+
+## UserForm export/import note (.frm + .frx)
+
+When you export `frmMain` from VBE, Excel may generate both:
+- `frmMain.frm` (text definition), and
+- `frmMain.frx` (binary control/resource data, referenced by `OleObjectBlob`).
+
+If `OleObjectBlob` is present in `.frm`, keep and distribute the matching `.frx` file beside it during import. Missing `.frx` can cause import failure or incomplete controls.
+

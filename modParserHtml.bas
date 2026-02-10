@@ -40,7 +40,8 @@ Public Function ParseHtmlReportFile(ByVal filePath As String) As Collection
             c4 = CleanText(tds.Item(3).innerText)
 
             If IsLeafRow(c2, c3, c4) Then
-                Dim rec As TReportRow
+                Dim rec As CReportRow
+                Set rec = NewReportRow()
                 rec.AccountCode = ExtractLeadingCode(c1)
                 rec.Label = ExtractLabel(c1)
                 rec.ValCurrent = ParseNumber(c2)
